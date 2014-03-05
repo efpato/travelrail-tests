@@ -69,7 +69,7 @@ class Controller:
     def find_result(self, cabin_class, fare_class, origin, destination, departure_time, data_route_back=None):
         results = dict()
         elements = self.driver.find_elements_by_xpath(
-            '//a[@data-parent="#accordion-results" and contains(., "{0}") and contains(., "{1}")]'.format(
+            '//a[@data-parent="#accordion-results" and contains(., "{0} {1}")]'.format(
                 cabin_class, fare_class)
         )
         for result in elements:
