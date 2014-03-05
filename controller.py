@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from selenium.webdriver.support.ui import Select
-
 
 class TimeInterval:
-    EarlyMorning = {"ru": "Раннее утро 06:00", "en": "Early morning 06:00"}
-    Morning = {"ru": "Утро (09:00)", "en": "Morning (09:00)"}
-    Noon = {"ru": "Полдень (12:00)", "en": "Noon (12:00)"}
-    Afternoon = {"ru": "В обед (14:00)", "en": "Afternoon (14:00)"}
-    Evening = {"ru": "Вечер (18:00)", "en": "Evening (18:00)"}
-    LateEvening = {"ru": "Поздний вечер (21:00)", "en": "Late evening (21:00)"}
+    EarlyMorning = {"ru": u"Раннее утро 06:00", "en": u"Early morning 06:00"}
+    Morning = {"ru": u"Утро (09:00)", "en": u"Morning (09:00)"}
+    Noon = {"ru": u"Полдень (12:00)", "en": u"Noon (12:00)"}
+    Afternoon = {"ru": u"В обед (14:00)", "en": u"Afternoon (14:00)"}
+    Evening = {"ru": u"Вечер (18:00)", "en": u"Evening (18:00)"}
+    LateEvening = {"ru": u"Поздний вечер (21:00)", "en": u"Late evening (21:00)"}
 
 
 class CabinClass:
@@ -34,7 +32,7 @@ class FareClass:
 
 
 class DocumentType:
-    Passport = {"ru": "Паспорт", "en": "Traveller passport"}
+    Passport = {"ru": u"Паспорт", "en": u"Traveller passport"}
 
 
 class DeliveryOption:
@@ -61,12 +59,12 @@ class Controller:
         self.locale = locale
 
     @staticmethod
-    def select(select, text):
-        for option in select.options:
-            if option.text == text.decode('unicode-escape'):
-                option.click()
+    def option(select, text):
+        for option in select.find_elements_by_tag_name("option"):
+            if option.text == text:
+                return option
 
-    def find_result(self, cabin_class, fare_class, origin, destination, departure_time, data_route_back=None):
+    def find_result(self, cabin_class, fare_class, origin, destination, departure_time, data_route_back=False):
         results = dict()
         elements = self.driver.find_elements_by_xpath(
             '//a[@data-parent="#accordion-results" and contains(., "{0} {1}")]'.format(
@@ -77,7 +75,7 @@ class Controller:
 
         for key in results.keys():
             table = self.driver.find_element_by_xpath("//div[@id='{0}']/div/form/table".format(key))
-            if data_route_back is None:
+            if not data_route_back:
                 lines = table.find_elements_by_xpath(
                     './/tr['
                     'td[2]//text()[contains(., "{0}")] and '
@@ -98,9 +96,8 @@ class Controller:
                     'td[3]//text()[contains(., "{2}")]'
                     ') or ('
                     'td[2]//text()[contains(., "{2}")] and '
-                    'td[3]//text()[contains(., "{0}")] and '
-                    'td[3]//text()[contains(., "{3}")]'
-                    ')]'.format(origin, departure_time, destination, data_route_back))
+                    'td[3]//text()[contains(., "{0}")]'
+                    ')]'.format(origin, departure_time, destination))
                 if len(lines) >= 2:
                     if not table.is_displayed():
                         results[key].click()
@@ -151,15 +148,15 @@ class Controller:
 
     @property
     def time(self):
-        return [Select(e) for e in self.driver.find_elements_by_xpath("//select[contains(@name, 'times_')]")]
+        return self.driver.find_elements_by_xpath("//select[contains(@name, 'times_')]")
 
     @property
     def time_route_back(self):
-        return Select(self.driver.find_element_by_name("times_roundTripBack"))
+        return self.driver.find_element_by_name("times_roundTripBack")
 
     @property
     def passenger_age(self):
-        return [Select(e) for e in self.driver.find_elements_by_xpath("//select[contains(@name, 'passengerAge')]")]
+        return self.driver.find_elements_by_xpath("//select[contains(@name, 'passengerAge')]")
 
     @property
     def choose_leg_solution(self):
@@ -189,7 +186,7 @@ class Controller:
 
     @property
     def document_type(self):
-        return [Select(e) for e in self.driver.find_elements_by_xpath("//select[contains(@name, 'documentType_')]")]
+        return self.driver.find_elements_by_xpath("//select[contains(@name, 'documentType_')]")
 
     @property
     def document_number(self):
@@ -258,11 +255,11 @@ class Controller:
 
     @property
     def country(self):
-        return Select(self.driver.find_element_by_name("country"))
+        return self.driver.find_element_by_name("country")
 
     @property
     def address_type(self):
-        return Select(self.driver.find_element_by_name("addressType"))
+        return self.driver.find_element_by_name("addressType")
 
     @property
     def general_terms_of_service(self):

@@ -25,16 +25,17 @@ class JourneyTestCase(unittest.TestCase):
         self.assertEqual(self.controller.driver.title, u"Путешествуй сам - TravelRail.RU", "Start page not loaded.")
         self.controller.language.click()
 
-    # def tearDown(self):
-    #     self.adapter.driver.close()
+    def tearDown(self):
+        self.adapter.driver.close()
 
     def add_passengers(self, passengers):
         for i, passenger in enumerate(passengers):
             if i > 0:
                 self.controller.add_passenger.click()
-            self.controller.select(self.controller.passenger_age[i], passenger.age)
+            self.controller.option(self.controller.passenger_age[i], passenger.age).click()
 
     def set_passengers(self, passengers):
+        counter = 0
         for i, passenger in enumerate(passengers):
             self.controller.first_name[i].send_keys(passenger.first_name)
             self.controller.last_name[i].send_keys(passenger.last_name)
@@ -43,12 +44,13 @@ class JourneyTestCase(unittest.TestCase):
             else:
                 self.controller.female[i].click()
             if passenger.document_type is not None:
-                self.controller.select(self.controller.document_type[i], passenger.document_type)
+                self.controller.option(self.controller.document_type[counter], passenger.document_type).click()
             if passenger.document_number is not None:
-                self.controller.document_number[i].send_keys(passenger.document_number)
+                self.controller.document_number[counter].send_keys(passenger.document_number)
             if passenger.document_expires is not None:
-                self.controller.document_expires[i].clear()
-                self.controller.document_expires[i].send_keys(passenger.document_expires)
+                self.controller.document_expires[counter].clear()
+                self.controller.document_expires[counter].send_keys(passenger.document_expires)
+                counter += 1
         self.controller.email.send_keys("1234@gmail.com")
         self.controller.phone.send_keys("+79035554093")
 
@@ -68,7 +70,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
     def test_1(self):
         origin = "Crewe"
         destination = "Stafford"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
         time_to = TimeInterval.EarlyMorning[self.locale]
         passengers = [
             Passenger(
@@ -84,7 +86,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys(destination)
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -113,9 +115,10 @@ class ATOCJourneyTestCase(JourneyTestCase):
     def test_3(self):
         origin = "Weymouth"
         destination = "London Waterloo"
-        date_to = next_weekday(datetime.date.today(), calendar.FRIDAY, offset=7).strftime('%d.%m.%Y')
+        d = next_weekday(datetime.date.today(), calendar.FRIDAY, offset=30)
+        date_to = d.strftime('%d.%m.%Y')
         time_to = TimeInterval.Morning[self.locale]
-        date_back = next_weekday(datetime.date.today(), calendar.SATURDAY, offset=7).strftime('%d.%m.%Y')
+        date_back = next_weekday(d, calendar.SATURDAY).strftime('%d.%m.%Y')
         time_back = TimeInterval.Morning[self.locale]
         passengers = [
             Passenger(
@@ -128,14 +131,14 @@ class ATOCJourneyTestCase(JourneyTestCase):
         ]
 
         self.controller.origin[0].send_keys(origin)
-        self.controller.destination[0].send_keys("London (All Stations")
+        self.controller.destination[0].send_keys("London (All Stations)")
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.round_trip.click()
         self.controller.date_route_back.clear()
         self.controller.date_route_back.send_keys(date_back)
-        self.controller.select(self.controller.time_route_back, time_back)
+        self.controller.option(self.controller.time_route_back, time_back).click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
 
@@ -181,7 +184,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys(destination)
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -240,7 +243,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys("London (All Stations)")
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -284,7 +287,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys("London (All Stations)")
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -310,8 +313,9 @@ class ATOCJourneyTestCase(JourneyTestCase):
     def test_15(self):
         origin = "Manchester Piccadilly"
         destination = "London Euston"
-        date_to_1 = next_weekday(datetime.date.today(), calendar.THURSDAY, offset=14).strftime('%d.%m.%Y')
-        date_to_2 = next_weekday(datetime.date.today(), calendar.FRIDAY, offset=14).strftime('%d.%m.%Y')
+        d = next_weekday(datetime.date.today(), calendar.THURSDAY, offset=30)
+        date_to_1 = d.strftime('%d.%m.%Y')
+        date_to_2 = next_weekday(d, calendar.FRIDAY).strftime('%d.%m.%Y')
         time_to_1 = TimeInterval.Noon[self.locale]
         time_to_2 = TimeInterval.Noon[self.locale]
         passengers = [
@@ -328,13 +332,13 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys("London (All Stations)")
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to_1)
-        self.controller.select(self.controller.time[0], time_to_1)
+        self.controller.option(self.controller.time[0], time_to_1).click()
         self.controller.extend_route.click()
         self.controller.origin[1].send_keys("London (All Stations)")
         self.controller.destination[1].send_keys("Manchester (All Stations)")
         self.controller.date[1].clear()
         self.controller.date[1].send_keys(date_to_2)
-        self.controller.select(self.controller.time[1], time_to_2)
+        self.controller.option(self.controller.time[1], time_to_2).click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
 
@@ -383,7 +387,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys(destination)
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -425,7 +429,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys(destination)
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -467,7 +471,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys("Reading (All Stations)")
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
@@ -514,7 +518,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.controller.destination[0].send_keys(destination)
         self.controller.date[0].clear()
         self.controller.date[0].send_keys(date_to)
-        self.controller.select(self.controller.time[0], time_to)
+        self.controller.option(self.controller.time[0], time_to).click()
         self.controller.one_way.click()
         self.add_passengers(passengers)
         self.controller.submit_route.click()
