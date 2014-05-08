@@ -4,7 +4,9 @@ import unittest
 import json
 import datetime
 import calendar
+import requests
 from selenium.webdriver import Firefox
+from selenium.common.exceptions import NoSuchElementException
 
 from utils import next_weekday
 from controller import Controller, CabinClass, FareClass, DocumentType, TimeInterval
@@ -17,16 +19,23 @@ class JourneyTestCase(unittest.TestCase):
         config = json.JSONDecoder().decode(open("config.json").read())
         self.url = config.get("url", "http://test.travelrail.ru")
         self.locale = "ru"
-        self.controller = Controller(Firefox(), self.locale)
+        self.controller = None
+
+    def set_filter_route_options(self, count):
+        response = requests.request("get", "{0}/admin/setfilterrouteoptions.php?value={1}/".format(self.url, count))
+        self.assertEquals(200, response.status_code)
 
     def setUp(self):
+        self.set_filter_route_options(1000)
+        self.controller = Controller(Firefox(), self.locale)
         self.controller.driver.maximize_window()
         self.controller.driver.get(self.url)
         self.assertEqual(self.controller.driver.title, u"Путешествуй сам - TravelRail.RU", "Start page not loaded.")
         self.controller.language.click()
 
     def tearDown(self):
-        self.adapter.driver.close()
+        self.controller.driver.close()
+        self.set_filter_route_options(8)
 
     def add_passengers(self, passengers):
         for i, passenger in enumerate(passengers):
@@ -65,6 +74,12 @@ class JourneyTestCase(unittest.TestCase):
         self.controller.silver_rail_terms_of_service.click()
         self.controller.custom_terms_of_service.click()
 
+    def choose_type_of_seats(self):
+        try:
+            self.controller.choose_ticket_delivery_options.click()
+        except NoSuchElementException:
+            pass
+
 
 class ATOCJourneyTestCase(JourneyTestCase):
     def test_1(self):
@@ -102,6 +117,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
 
         self.controller.collect_at_ticket_office.click()
         self.agree()
@@ -155,6 +172,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
+        self.choose_type_of_seats()
+
         self.controller.ticket_by_dhl_international.click()
         self.set_address_info()
         self.agree()
@@ -200,6 +219,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
 
         self.controller.ticket_by_royal_mail.click()
         self.set_address_info()
@@ -260,6 +281,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
+        self.choose_type_of_seats()
+
         self.controller.ticket_by_dhl_international.click()
         self.controller.recepient_name.send_keys("{0} {1}".format(passengers[3].first_name, passengers[3].last_name))
         self.set_address_info()
@@ -303,6 +326,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
 
         self.controller.collect_at_ticket_office.click()
         self.agree()
@@ -361,6 +386,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
+        self.choose_type_of_seats()
+
         self.controller.ticket_by_royal_mail.click()
         self.set_address_info()
         self.agree()
@@ -404,6 +431,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
+        self.choose_type_of_seats()
+
         self.controller.collect_at_ticket_office.click()
         self.agree()
         self.controller.proceed_to_payment.click()
@@ -446,6 +475,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
+        self.choose_type_of_seats()
+
         self.controller.collect_at_ticket_office.click()
         self.agree()
         self.controller.proceed_to_payment.click()
@@ -487,6 +518,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
 
         self.controller.ticket_by_royal_mail.click()
         self.set_address_info()
@@ -535,6 +568,8 @@ class ATOCJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
+        self.choose_type_of_seats()
+
         self.controller.ticket_by_royal_mail.click()
         self.controller.recepient_name.send_keys("{0} {1}".format(passengers[0].first_name, passengers[0].last_name))
         self.set_address_info()
@@ -579,7 +614,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
-        self.controller.choose_ticket_delivery_options.click()
+        self.choose_type_of_seats()
 
         self.controller.print_at_home.click()
         self.agree()
@@ -587,8 +622,6 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         self.controller.make_payment.click()
 
-    # ERROR: 'Turista' & 'Ida y Vuelta' not found. Have: 'Turista Plus' & 'Ida y Vuelta'
-    # ERROR: 500 error after click 'Delivery'
     def test_02(self):
         origin = "MADRID-PUERTA DE ATOCHA"
         destination = "SEVILLA SANTA JUSTA"
@@ -631,7 +664,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
-        self.controller.choose_ticket_delivery_options.click()
+        self.choose_type_of_seats()
 
         self.controller.print_at_home.click()
         self.agree()
@@ -673,7 +706,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
-        self.controller.choose_ticket_delivery_options.click()
+        self.choose_type_of_seats()
 
         self.controller.print_at_home.click()
         self.agree()
@@ -681,7 +714,6 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         self.controller.make_payment.click()
 
-    # ERROR: FareClass 'Empresas' not found.
     def test_04(self):
         origin = "SEVILLA SANTA JUSTA"
         destination = "MADRID-PUERTA DE ATOCHA"
@@ -707,28 +739,27 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.add_passengers(passengers)
         self.controller.submit_route.click()
 
-        # result = self.controller.find_result(
-        #     cabin_class=CabinClass.Preferente[self.locale],
-        #     fare_class=FareClass.IdaYVuelta,
-        #     origin=origin,
-        #     destination=destination,
-        #     departure_time="",
-        #     data_route_back=date_back)
-        # self.assertTrue(result, "Not found result.")
-        # self.controller.choose_leg_solution.click()
-        #
-        # self.set_passengers(passengers)
-        # self.controller.choose_ticket_delivery_options.click()
-        #
-        # self.controller.choose_ticket_delivery_options.click()
-        #
-        # self.controller.print_at_home.click()
-        # self.agree()
-        # self.controller.proceed_to_payment.click()
-        #
-        # self.controller.make_payment.click()
+        result = self.controller.find_result(
+            cabin_class=CabinClass.Preferente[self.locale],
+            fare_class=FareClass.,
+            origin=origin,
+            destination=destination,
+            departure_time="",
+            data_route_back=date_back)
+        self.assertTrue(result, "Not found result.")
+        self.controller.choose_leg_solution.click()
 
-    # ERROR: 500 error after click 'Delivery'
+        self.set_passengers(passengers)
+        self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
+
+        self.controller.print_at_home.click()
+        self.agree()
+        self.controller.proceed_to_payment.click()
+
+        self.controller.make_payment.click()
+
     def test_05(self):
         origin = "MADRID-PUERTA DE ATOCHA"
         destination = "SEVILLA SANTA JUSTA"
@@ -771,7 +802,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
-        self.controller.choose_ticket_delivery_options.click()
+        self.choose_type_of_seats()
 
         self.controller.print_at_home.click()
         self.agree()
@@ -779,7 +810,6 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         self.controller.make_payment.click()
 
-    # ERROR: FareClass 'Empresas' not found.
     def test_06(self):
         origin = "SEVILLA SANTA JUSTA"
         destination = "CADIZ"
@@ -834,7 +864,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.set_passengers(passengers)
         self.controller.choose_ticket_delivery_options.click()
 
-        self.controller.choose_ticket_delivery_options.click()
+        self.choose_type_of_seats()
 
         self.controller.print_at_home.click()
         self.agree()
@@ -877,7 +907,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         # self.set_passengers(passengers)
         # self.controller.choose_ticket_delivery_options.click()
         #
-        # self.controller.choose_ticket_delivery_options.click()
+        # self.choose_type_of_seats()
         #
         # self.controller.print_at_home.click()
         # self.agree()
@@ -924,7 +954,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
         # self.set_passengers(passengers)
         # self.controller.choose_ticket_delivery_options.click()
         #
-        # self.controller.choose_ticket_delivery_options.click()
+        # self.choose_type_of_seats()
         #
         # self.controller.print_at_home.click()
         # self.agree()

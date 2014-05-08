@@ -82,7 +82,6 @@ class Controller:
                     'td[2]//text()[contains(., "{1}")] and '
                     'td[3]//text()[contains(., "{2}")]'
                     ']'.format(origin, departure_time, destination))
-
                 if lines:
                     if not table.is_displayed():
                         results[key].click()
