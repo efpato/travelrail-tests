@@ -4,7 +4,7 @@ import unittest
 import json
 import datetime
 import calendar
-import requests
+import urllib2
 from selenium.webdriver import Firefox
 from selenium.common.exceptions import NoSuchElementException
 
@@ -22,8 +22,8 @@ class JourneyTestCase(unittest.TestCase):
         self.controller = None
 
     def set_filter_route_options(self, count):
-        response = requests.request("get", "{0}/admin/setfilterrouteoptions.php?value={1}/".format(self.url, count))
-        self.assertEquals(200, response.status_code)
+        response = urllib2.urlopen("{0}/admin/setfilterrouteoptions.php?value={1}/".format(self.url, count))
+        self.assertEquals(200, response.code)
 
     def setUp(self):
         self.set_filter_route_options(1000)
@@ -388,8 +388,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.choose_type_of_seats()
 
-        self.controller.ticket_by_royal_mail.click()
-        self.set_address_info()
+        self.controller.collect_at_ticket_office.click()
         self.agree()
         self.controller.proceed_to_payment.click()
 
@@ -512,7 +511,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
             fare_class=FareClass.OffPeakDay,
             origin=origin,
             destination=destination,
-            departure_time="09:55")
+            departure_time="09:40")
         self.assertTrue(result, "Not found result.")
         self.controller.choose_leg_solution.click()
 
@@ -741,7 +740,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         result = self.controller.find_result(
             cabin_class=CabinClass.Preferente[self.locale],
-            fare_class=FareClass.,
+            # fare_class=FareClass.Empresas,
             origin=origin,
             destination=destination,
             departure_time="",
