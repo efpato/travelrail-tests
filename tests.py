@@ -222,8 +222,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.choose_type_of_seats()
 
-        self.controller.ticket_by_royal_mail.click()
-        self.set_address_info()
+        self.controller.collect_at_ticket_office.click()
         self.agree()
         self.controller.proceed_to_payment.click()
 
@@ -520,8 +519,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.choose_type_of_seats()
 
-        self.controller.ticket_by_royal_mail.click()
-        self.set_address_info()
+        self.controller.collect_at_ticket_office.click()
         self.agree()
         self.controller.proceed_to_payment.click()
 
@@ -569,9 +567,7 @@ class ATOCJourneyTestCase(JourneyTestCase):
 
         self.choose_type_of_seats()
 
-        self.controller.ticket_by_royal_mail.click()
-        self.controller.recepient_name.send_keys("{0} {1}".format(passengers[0].first_name, passengers[0].last_name))
-        self.set_address_info()
+        self.controller.collect_at_ticket_office.click()
         self.agree()
         self.controller.proceed_to_payment.click()
 

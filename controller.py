@@ -37,7 +37,7 @@ class DocumentType:
 
 class DeliveryOption:
     CollectAtTicketOffice = {"ru": "В билетной кассе", "en": "Collect at Ticket Office"}
-    TicketByDHLInternational = {"ru": "Почтовым сервисом DHL", "en": "Ticket by DHL International"}
+    TicketByDHLInternational = {"ru": "Ticket by International DHL Next Day", "en": "Ticket by International DHL Next Day"}
     TicketByRoyalMail = {"ru": "Почтовым сервисом Royal Mail", "en": "Ticket by Royal Mail"}
     PrintAtHome = {"ru": "Print At Home", "en": "Print At Home"}
 
