@@ -30,6 +30,10 @@ class FareClass:
     Promo = "PROMO "
     PromoPlus = "PROMOPLUS"
     IdaYVuelta = "IDAYVUELTA"
+    Empresas = "EMPRESAS"
+    Tarjeta = "TORJETA"
+    Dorada = "DORADA"
+    Joven = "JOVEN"
 
 
 class DocumentType:

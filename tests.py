@@ -578,7 +578,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
     def test_01(self):
         origin = "MADRID-PUERTA DE ATOCHA"
         destination = "BARCELONA-SANTS"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -620,8 +620,8 @@ class RenfeJourneyTestCase(JourneyTestCase):
     def test_02(self):
         origin = "MADRID-PUERTA DE ATOCHA"
         destination = "SEVILLA SANTA JUSTA"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
-        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
+        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -670,7 +670,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
     def test_03(self):
         origin = "MADRID-PUERTA DE ATOCHA"
         destination = "ZARAGOZA-DELICIAS"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -712,8 +712,8 @@ class RenfeJourneyTestCase(JourneyTestCase):
     def test_04(self):
         origin = "SEVILLA SANTA JUSTA"
         destination = "MADRID-PUERTA DE ATOCHA"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
-        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
+        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -736,7 +736,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         result = self.controller.find_result(
             cabin_class=CabinClass.Preferente[self.locale],
-            # fare_class=FareClass.Empresas,
+            fare_class=FareClass.Empresas,
             origin=origin,
             destination=destination,
             departure_time="",
@@ -758,7 +758,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
     def test_05(self):
         origin = "MADRID-PUERTA DE ATOCHA"
         destination = "SEVILLA SANTA JUSTA"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -808,8 +808,8 @@ class RenfeJourneyTestCase(JourneyTestCase):
     def test_06(self):
         origin = "SEVILLA SANTA JUSTA"
         destination = "CADIZ"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
-        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
+        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Son1",
@@ -867,11 +867,10 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         self.controller.make_payment.click()
 
-    # ERROR: FareClass 'Tarjeta Dorada' not found.
     def test_07(self):
         origin = "MALAGA"
         destination = "MADRID-PUERTA DE ATOCHA"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -890,32 +889,31 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.add_passengers(passengers)
         self.controller.submit_route.click()
 
-        # result = self.controller.find_result(
-        #     cabin_class=CabinClass.Preferente[self.locale],
-        #     fare_class=FareClass.Promo,
-        #     origin=origin,
-        #     destination=destination,
-        #     departure_time="")
-        # self.assertTrue(result, "Not found result.")
-        # self.controller.choose_leg_solution.click()
-        #
-        # self.set_passengers(passengers)
-        # self.controller.choose_ticket_delivery_options.click()
-        #
-        # self.choose_type_of_seats()
-        #
-        # self.controller.print_at_home.click()
-        # self.agree()
-        # self.controller.proceed_to_payment.click()
-        #
-        # self.controller.make_payment.click()
+        result = self.controller.find_result(
+            cabin_class=CabinClass.Preferente[self.locale],
+            fare_class="{0} {1}".format(FareClass.Tarjeta, FareClass.Dorada),
+            origin=origin,
+            destination=destination,
+            departure_time="")
+        self.assertTrue(result, "Not found result.")
+        self.controller.choose_leg_solution.click()
 
-    # ERROR: FareClass 'Tarjeta Joven' not found.
+        self.set_passengers(passengers)
+        self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
+
+        self.controller.print_at_home.click()
+        self.agree()
+        self.controller.proceed_to_payment.click()
+
+        self.controller.make_payment.click()
+
     def test_08(self):
         origin = "BARCELONA-SANTS"
         destination = "VALENCIA JOAQUIN SOROLLA"
-        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=30).strftime('%d.%m.%Y')
-        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=30).strftime('%d.%m.%Y')
+        date_to = next_weekday(datetime.date.today(), calendar.MONDAY, offset=7).strftime('%d.%m.%Y')
+        date_back = next_weekday(datetime.date.today(), calendar.TUESDAY, offset=7).strftime('%d.%m.%Y')
         passengers = [
             Passenger(
                 first_name="Bill",
@@ -936,26 +934,26 @@ class RenfeJourneyTestCase(JourneyTestCase):
         self.add_passengers(passengers)
         self.controller.submit_route.click()
 
-        # result = self.controller.find_result(
-        #     cabin_class=CabinClass.Turista[self.locale],
-        #     fare_class=FareClass.Flexible,
-        #     origin=origin,
-        #     destination=destination,
-        #     departure_time="",
-        #     data_route_back=date_back)
-        # self.assertTrue(result, "Not found result.")
-        # self.controller.choose_leg_solution.click()
-        #
-        # self.set_passengers(passengers)
-        # self.controller.choose_ticket_delivery_options.click()
-        #
-        # self.choose_type_of_seats()
-        #
-        # self.controller.print_at_home.click()
-        # self.agree()
-        # self.controller.proceed_to_payment.click()
-        #
-        # self.controller.make_payment.click()
+        result = self.controller.find_result(
+            cabin_class=CabinClass.Turista[self.locale],
+            fare_class="{0} {1}".format(FareClass.Tarjeta, FareClass.Joven),
+            origin=origin,
+            destination=destination,
+            departure_time="",
+            data_route_back=date_back)
+        self.assertTrue(result, "Not found result.")
+        self.controller.choose_leg_solution.click()
+
+        self.set_passengers(passengers)
+        self.controller.choose_ticket_delivery_options.click()
+
+        self.choose_type_of_seats()
+
+        self.controller.print_at_home.click()
+        self.agree()
+        self.controller.proceed_to_payment.click()
+
+        self.controller.make_payment.click()
 
 
 if __name__ == "__main__":
