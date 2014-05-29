@@ -848,7 +848,7 @@ class RenfeJourneyTestCase(JourneyTestCase):
 
         result = self.controller.find_result(
             cabin_class=CabinClass.Turista[self.locale],
-            fare_class=FareClass.Flexible,
+            fare_class="{0}, {1}".format(FareClass.Ninos, FareClass.Flexible),
             origin=origin,
             destination=destination,
             departure_time="",

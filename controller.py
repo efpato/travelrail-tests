@@ -26,6 +26,7 @@ class FareClass:
     OffPeakDay = "OFFPEAK_DAY"
     Advance = "ADVANCE"
     Flexible = "FLEXIBLE"
+    Ninos = "NINOS"
     Promo = "PROMO "
     PromoPlus = "PROMOPLUS"
     IdaYVuelta = "IDAYVUELTA"
